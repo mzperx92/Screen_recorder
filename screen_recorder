@@ -1,0 +1,139 @@
+from tkinter import ttk
+from tkinter import *
+import pyscreenrec
+import time
+
+
+# recorder object
+
+recorder = pyscreenrec.ScreenRecorder()
+
+#functions and global variables
+
+counter = 0
+timer_s = 0
+timer_m = 0
+timer_h = 0
+g = True
+time_list = []
+
+
+def timer():
+    global g
+    global timer_s
+    global timer_m
+    global timer_h
+    global time_list
+    time_list = [timer_h, timer_m, timer_s]
+    print(time_list)
+    if g == True:
+        canvas.itemconfig(c_timer, text="hours : " + str(timer_h) + '\n'"minutes : " + str(timer_m) + '\n'"seconds : " + str(timer_s))
+        timer_s += 1
+        if timer_s % 60 == 0:
+            timer_s = 0
+            timer_m += 1
+        if timer_m == 60:
+            timer_m = 0
+            timer_h += 1
+        window.after(1000, timer)
+
+
+def play():
+    global counter
+    global g
+    global timer_s
+    global timer_m
+    global timer_h
+    global time_list
+    time_list.clear()
+    print(time_list)
+    timer_s = 0
+    timer_m = 0
+    timer_h = 0
+    g = True
+    recorder.start_recording(f"videos/video_{counter}.mp4", 15)
+    canvas.itemconfig(c_text, text="Recording")
+    timer()
+
+
+def pause():
+    global counter
+    recorder.pause_recording()
+    canvas.itemconfig(c_text, text="Pause")
+    counter += 1
+
+def stop():
+    global time_list
+    global counter
+    global timer_s
+    global timer_m
+    global timer_h
+    global time_list
+    global g
+    g = False
+    recorder.stop_recording()
+    canvas.itemconfig(c_text, text="Stop")
+    counter += 1
+    rec_time = []
+    for i in range(len(time_list)):
+        if time_list[i] < 10:
+            rec_time.append("0" + str(time_list[i]))
+        else:
+            rec_time.append(str(time_list[i]))
+    canvas.itemconfig(c_rec_time, text="rec_time: " + rec_time[0] + ":" + rec_time[1] + ":" + rec_time[2])
+
+
+#Colors
+
+BG_COLOR = "#301E67"
+CANVAS_COLOR = "#B6EADA"
+TITLE_COLOR = "#5B8FB9"
+
+# tkinter object
+window = Tk()
+window.geometry("400x500")
+window.resizable(False, False)
+window.config(bg=BG_COLOR)
+
+#icon img
+
+icon_img = PhotoImage(file="images/app-icon.png")
+window.iconphoto(False, icon_img)
+
+#Title Label
+title_label = Label(text="Screen Recorder", font=("Ariel", 25, "bold"), bg=BG_COLOR, highlightthickness=0, fg=TITLE_COLOR)
+#title_label.grid(row=0, column=1, pady=25)
+title_label.place(x=70, y=20)
+
+#canvas
+canvas = Canvas(window, height=200, width=300, bg=CANVAS_COLOR, highlightthickness=0)
+c_text = canvas.create_text(150, 85,text="Hello", font=("Ariel", 40, "italic"))
+c_timer = canvas.create_text(140, 140, text="")
+c_rec_time = canvas.create_text(140, 30, text="")
+
+
+#canvas.grid(row=1, column=0, columnspan=3, pady=20, padx=50)
+canvas.place(x=50, y=80, relx=0.01, rely=0.01)
+
+#play_button
+play_img = PhotoImage(file="images/right.png",)
+play_button = Button(text="Play", command=play, highlightthickness=0, image=play_img,height=50,width=50)
+
+#play_button.grid(row=2, column=0, padx=10, pady=20)
+play_button.place(x=65, y=320)
+
+#pause button
+pause_button = Button(text="Pause", command=pause)
+#pause_button.grid(row=2, column=1, padx=10, pady=20)
+pause_button.place(x=185, y=320)
+
+#stop button
+stop_img = PhotoImage(file="images/wrong.png")
+stop_button = Button(text="Stop", command=stop, image=stop_img, highlightthickness=0, height=50, width=50)
+#stop_button.grid(row=2, column=2, padx=10, pady=20)
+stop_button.place(x=305, y=320)
+
+#new_button = ttk.Button(window, text="new_button")
+#new_button.place(x=100, y=350)
+
+window.mainloop()
